@@ -262,23 +262,37 @@ while running:
             else:
                 current_input += event.unicode
         if event.type == pygame.MOUSEBUTTONDOWN and not game_over and not input_mode and not menu_active:
-            mouseX = event.pos[0] // SQUARE_SIZE
-            mouseY = (event.pos[1] - BOARD_OFFSET) // SQUARE_SIZE
-            if 0 <= mouseX < BOARD_COLS and 0 <= mouseY < BOARD_ROWS and board[mouseY][mouseX] == 0:
-                if click_sound:
-                    click_sound.play()
-                board[mouseY][mouseX] = player
-                if check_win(player):
-                    game_over = True
-                    winner = player
-                    if player == 1:
-                        score["X"] += 1
-                    else:
-                        score["O"] += 1
-                elif check_draw():
-                    game_over = True
-                    winner = 0
-                player = 2 if player == 1 else 1
+            mouse_x, mouse_y = event.pos
+            # Check buttons
+            if 50 <= mouse_x <= 50 + 120 and 10 <= mouse_y <= 10 + 40:  # Reset Game
+                reset_board()
+            elif 200 <= mouse_x <= 200 + 120 and 10 <= mouse_y <= 10 + 40:  # Reset Score
+                reset_score()
+            elif 350 <= mouse_x <= 350 + 120 and 10 <= mouse_y <= 10 + 40:  # Set Names
+                input_mode = True
+                input_for = 1
+                current_input = ""
+            elif 500 <= mouse_x <= 500 + 120 and 10 <= mouse_y <= 10 + 40:  # Back Menu
+                menu_active = True
+                reset_board()
+                reset_score()
+            else:
+                # Board click
+                mouseX = event.pos[0] // SQUARE_SIZE
+                mouseY = (event.pos[1] - BOARD_OFFSET) // SQUARE_SIZE
+                if 0 <= mouseX < BOARD_COLS and 0 <= mouseY < BOARD_ROWS and board[mouseY][mouseX] == 0:
+                    if click_sound:
+                        click_sound.play()
+                    board[mouseY][mouseX] = player
+                    if check_win(player):
+                        game_over = True
+                        winner = player
+                        if player == 1:
+                            score["X"] += 1
+                        else:
+                            score["O"] += 1
+                    # Switch player after move
+                    player = 2 if player == 1 else 1
         elif event.type == pygame.MOUSEBUTTONDOWN and menu_active and not input_mode:
             mouse_x, mouse_y = event.pos
             # Check Set Name button
@@ -291,25 +305,24 @@ while running:
             elif WIDTH // 2 - 100 <= mouse_x <= WIDTH // 2 + 100 and HEIGHT // 2 + 50 <= mouse_y <= HEIGHT // 2 + 100:
                 menu_action = "quit"
 
-    if menu_active:
-        if input_mode:
-            prompt_text = f"Masukkan nama Player {input_for} ({'X' if input_for == 1 else 'O'}):"
-            prompt_surf = FONT.render(prompt_text, True, TEXT_COLOR)
-            screen.blit(prompt_surf, (WIDTH // 2 - prompt_surf.get_width() // 2, HEIGHT // 2 - 50))
-            input_surf = FONT.render(current_input, True, TEXT_COLOR)
-            screen.blit(input_surf, (WIDTH // 2 - input_surf.get_width() // 2, HEIGHT // 2))
-        else:
-            draw_menu()
-            if menu_action == "start_game":
-                menu_active = False
-                menu_action = None
-            elif menu_action == "set_name":
-                input_mode = True
-                input_for = 1
-                current_input = ""
-                menu_action = None
-            elif menu_action == "quit":
-                running = False
+    if input_mode:
+        prompt_text = f"Masukkan nama Player {input_for} ({'X' if input_for == 1 else 'O'}):"
+        prompt_surf = FONT.render(prompt_text, True, TEXT_COLOR)
+        screen.blit(prompt_surf, (WIDTH // 2 - prompt_surf.get_width() // 2, HEIGHT // 2 - 50))
+        input_surf = FONT.render(current_input, True, TEXT_COLOR)
+        screen.blit(input_surf, (WIDTH // 2 - input_surf.get_width() // 2, HEIGHT // 2))
+    elif menu_active:
+        draw_menu()
+        if menu_action == "start_game":
+            menu_active = False
+            menu_action = None
+        elif menu_action == "set_name":
+            input_mode = True
+            input_for = 1
+            current_input = ""
+            menu_action = None
+        elif menu_action == "quit":
+            running = False
     else:
         # Gambar garis dan figures
         draw_lines()
